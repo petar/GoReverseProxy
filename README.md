@@ -27,8 +27,13 @@ Nevertheless, it is still early to say that GoReverseProxy is truly production-r
 
 To install, simply run
 
+	git clone git://github.com/petar/GoReverseProxy.git GoReverseProxy-git
+	cd GoReverseProxy-git
 	make
 	make install
+
+There is an example config file in the subdirectory {reverseproxy} which is
+simple and self-explanatory.
 
 ## About
 
