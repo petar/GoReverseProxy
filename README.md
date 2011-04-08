@@ -1,9 +1,9 @@
 ## Description
 
-GoFrontline is an HTTP reverse proxy (similar to a simpler version of NGINX)
+GoReverseProxy is an HTTP reverse proxy (similar to a simpler version of NGINX)
 whose primary purpose currently is to multiplex incoming HTTP requests to 
 different backend servers according to virtual host, and to safeguard
-against malicious HTTP requests (GoFrontline will likely break before allowing
+against malicious HTTP requests (GoReverseProxy will likely break before allowing
 a backend server to break).
 
 ## Features
@@ -23,4 +23,4 @@ To install, simply run
 
 ## About
 
-GoFrontline is maintained by [Petar Maymounkov](http://pdos.csail.mit.edu/~petar/). 
+GoReverseProxy is maintained by [Petar Maymounkov](http://pdos.csail.mit.edu/~petar/). 
