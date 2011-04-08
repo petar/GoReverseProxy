@@ -136,13 +136,13 @@ func (p *Proxy) connLoop(s_ net.Conn) {
 	// Read and parse first request
 	req0, err := st.Read()
 	if err != nil {
-		st.DeepClose()
+		st.Close()
 		return
 	}
 	req0.Host = strings.ToLower(strings.TrimSpace(req0.Host))
 	if req0.Host == "" {
 		st.Write(req0, http.NewResponse400String("GoFrontline: missing host"))
-		st.DeepClose()
+		st.Close()
 		return
 	}
 
@@ -150,7 +150,7 @@ func (p *Proxy) connLoop(s_ net.Conn) {
 	host := p.config.ActualHost(req0.Host)
 	if host == "" {
 		st.Write(req0, http.NewResponse400String("GoFrontline: unknwon host"))
-		st.DeepClose()
+		st.Close()
 		return
 	}
 	p.fdl.Lock()
@@ -167,7 +167,7 @@ func (p *Proxy) connLoop(s_ net.Conn) {
 	c_, err = p.prepConn(c_)
 	if err != nil {
 		st.Write(req0, http.NewResponse400String("GoFrontline: error on host conn"))
-		st.DeepClose()
+		st.Close()
 		return
 	}
 	ct := server.NewStampedClientConn(c_, nil)
@@ -244,7 +244,7 @@ func (p *Proxy) bury(q *connPair) {
 	defer p.Unlock()
 
 	p.pairs[q] = 0, false
-	q.s.DeepClose()
-	q.c.DeepClose()
+	q.s.Close()
+	q.c.Close()
 }
 
