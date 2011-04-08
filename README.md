@@ -1,9 +1,9 @@
 ## Description
 
-GoFrontline is an HTTP proxy server (similar to a simpler version of NGINX)
+GoFrontline is an HTTP reverse proxy (similar to a simpler version of NGINX)
 whose primary purpose currently is to multiplex incoming HTTP requests to 
 different backend servers according to virtual host, and to safeguard
-against malicious HTTP requests (GoFrontline will break before allowing
+against malicious HTTP requests (GoFrontline will likely break before allowing
 a backend server to break).
 
 ## Features
@@ -11,6 +11,8 @@ a backend server to break).
 * Pipelining 
 * Keepalive connections
 * Multiplexing by virtual hosts, specified in a config file
+* File-descriptor limiting
+* Connection timeouts
 
 ## Installation
 
