@@ -14,6 +14,15 @@ a backend server to break).
 * File-descriptor limiting
 * Connection timeouts
 
+## Maturity
+
+I am running GoReverseProxy in production (albeit a small production) in front
+of my blog [Population Algorithms](http://popalg.org) and it has been working fine.
+The blog requests are generally pretty heavy (since they pull in a lot of resource
+files and things). Keepalive and pipelining have been working correctly.
+
+Nevertheless, it is still early to say that GoReverseProxy is truly production-ready.
+
 ## Installation
 
 To install, simply run
