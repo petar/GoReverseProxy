@@ -16,7 +16,7 @@ _obj
 _test
 src/pkg/Make.deps
 _testmain.go
-frontline/frontline
+reverseproxy/reverseproxy
 
 syntax:regexp
 ^pkg/

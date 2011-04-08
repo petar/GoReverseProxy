@@ -212,7 +212,7 @@ __Close:
 func (p *Proxy) backLoop(ch <-chan *http.Request, q *connPair) {
 	for {
 		req, closed := <-ch
-		if closed {
+		if closed && req == nil {
 			goto __Close
 		}
 

@@ -10,7 +10,7 @@ import (
 
 var (
 	flagAddr   = flag.String("addr", "0.0.0.0:80", "Address to bind to")
-	flagConfig = flag.String("conf", "frontline.conf", "Config file")
+	flagConfig = flag.String("conf", "reverseproxy.conf", "Config file")
 )
 
 func main() {
