@@ -33,7 +33,7 @@ To install, simply run
 	make install
 
 There is an example config file in the subdirectory `reverseproxy` which is
-simple and self-explanatory.
+simple and self-explanatory in JSON format.
 
 ## About
 
