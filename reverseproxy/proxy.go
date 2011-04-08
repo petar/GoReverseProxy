@@ -3,6 +3,7 @@ package main
 
 import (
 	"container/list"
+	"log"
 	"net"
 	"os"
 	"strings"
@@ -46,8 +47,6 @@ func NewProxy(l net.Listener, config *Config) (*Proxy, os.Error) {
 		ech:    make(chan os.Error),
 	}
 	p.fdl.Init(config.FDLimit)
-	go p.acceptLoop()
-	go p.expireLoop()
 	return p, nil
 }
 
@@ -61,6 +60,12 @@ func NewProxyEasy(addr, configfile string) (*Proxy, os.Error) {
 		return nil, err
 	}
 	return NewProxy(l, conf)
+}
+
+func (p *Proxy) Start() os.Error {
+	go p.acceptLoop()
+	go p.expireLoop()
+	return <-p.ech
 }
 
 func (p *Proxy) ConfigString() string { return p.config.String() }
@@ -103,6 +108,7 @@ func (p *Proxy) acceptLoop() {
 		p.fdl.Lock()
 		c, err := l.Accept()
 		if err != nil {
+			log.Printf("Error accepting: %s\n", err)
 			if c != nil {
 				c.Close()
 			}
@@ -119,6 +125,14 @@ func (p *Proxy) prepConn(c net.Conn) (net.Conn, os.Error) {
 	c.(*net.TCPConn).SetKeepAlive(true)
 	err := c.SetReadTimeout(p.config.Timeout)
 	if err != nil {
+		log.Printf("Error TCP set read timeout: %s\n", err)
+		c.Close()
+		p.fdl.Unlock()
+		return c, err
+	}
+	err = c.SetWriteTimeout(p.config.Timeout)
+	if err != nil {
+		log.Printf("Error TCP set write timeout: %s\n", err)
 		c.Close()
 		p.fdl.Unlock()
 		return c, err
@@ -136,6 +150,7 @@ func (p *Proxy) connLoop(s_ net.Conn) {
 	// Read and parse first request
 	req0, err := st.Read()
 	if err != nil {
+		log.Printf("Read first Request: %s\n", err)
 		st.Close()
 		return
 	}
@@ -156,6 +171,7 @@ func (p *Proxy) connLoop(s_ net.Conn) {
 	p.fdl.Lock()
 	c_, err := net.Dial("tcp", host)
 	if err != nil {
+		log.Printf("Dial server: %s\n", err)
 		if c_ != nil {
 			c_.Close()
 		}
@@ -187,6 +203,7 @@ func (p *Proxy) frontLoop(ch chan<- *http.Request, q *connPair, req0 *http.Reque
 			var err os.Error
 			req, err = q.s.Read()
 			if err != nil {
+				log.Printf("Read Request: %s\n", err)
 				goto __Close
 			}
 			// TODO: Verify same Host
@@ -195,6 +212,7 @@ func (p *Proxy) frontLoop(ch chan<- *http.Request, q *connPair, req0 *http.Reque
 
 		err := q.c.Write(req)
 		if err != nil {
+			log.Printf("Write Request: %s\n", err)
 			goto __Close
 		}
 		ch <- req
@@ -218,11 +236,13 @@ func (p *Proxy) backLoop(ch <-chan *http.Request, q *connPair) {
 
 		resp, err := q.c.Read(req)
 		if err != nil {
+			log.Printf("Read Response: %s\n", err)
 			goto __Close
 		}
 
 		err = q.s.Write(req, resp)
 		if err != nil {
+			log.Printf("Write Response: %s\n", err)
 			goto __Close
 		}
 	}

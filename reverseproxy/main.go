@@ -22,5 +22,5 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Print(p.ConfigString())
-	<-make(chan int)
+	p.Start()
 }
