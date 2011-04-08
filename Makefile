@@ -20,7 +20,7 @@ QUOTED_GOBIN=$(subst $(space),\ ,$(GOBIN))
 all: install
 
 DIRS=\
-     	frontline\
+     	reverseproxy\
 
 TEST=\
 	$(filter-out $(NOTEST),$(DIRS))

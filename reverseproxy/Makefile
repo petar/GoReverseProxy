@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=frontline
+TARG=reverseproxy
 GOFILES=\
 	main.go\
 	proxy.go\
