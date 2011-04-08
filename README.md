@@ -32,7 +32,7 @@ To install, simply run
 	make
 	make install
 
-There is an example config file in the subdirectory {reverseproxy} which is
+There is an example config file in the subdirectory `reverseproxy` which is
 simple and self-explanatory.
 
 ## About
