@@ -5,6 +5,7 @@ import (
 	"container/list"
 	"net"
 	"os"
+	"strings"
 	"sync"
 	"time"
 	"github.com/petar/GoHTTP/http"
@@ -61,6 +62,8 @@ func NewProxyEasy(addr, configfile string) (*Proxy, os.Error) {
 	}
 	return NewProxy(l, conf)
 }
+
+func (p *Proxy) ConfigString() string { return p.config.String() }
 
 func (p *Proxy) expireLoop() {
 	for i := 0; ; i++ {
@@ -135,6 +138,7 @@ func (p *Proxy) connLoop(s_ net.Conn) {
 		st.Close()
 		return
 	}
+	req0.Host = strings.ToLower(strings.TrimSpace(req0.Host))
 	if req0.Host == "" {
 		st.Write(req0, http.NewResponse400String("GoFrontline: missing host"))
 		st.Close()

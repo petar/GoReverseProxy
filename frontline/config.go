@@ -2,10 +2,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"json"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -15,6 +17,22 @@ type Config struct {
 	Timeout int64 // Keep-alive timeout in nanoseconds
 	FDLimit int   // Maximum number of file descriptors
 	hosts	map[string][]string	// virtual host name -> array of actual net addr of server
+}
+
+func (c *Config) String() string {
+	c.Lock()
+	defer c.Unlock()
+
+	var w bytes.Buffer
+	fmt.Fprintf(&w, "Timeout=%g ns, FDLimit=%d\n", float64(c.Timeout), c.FDLimit)
+	for v, aa := range c.hosts {
+		fmt.Fprintf(&w, "%s->\n    ", v)
+		for _, a := range aa {
+			fmt.Fprintf(&w, "%s, ", a)
+		}
+		fmt.Fprintln(&w, "")
+	}
+	return string(w.Bytes())
 }
 
 func ParseConfigFile(filename string) (*Config, os.Error) {
@@ -57,22 +75,21 @@ func ParseConfigMap(m map[string]interface{}) (*Config, os.Error) {
 		ahosts := getSliceInterface(w["AHosts"])
 		a := []string{}
 		for _, ah_ := range ahosts {
-			ah := getString(ah_)
+			ah := strings.TrimSpace(getString(ah_))
 			if ah != "" {
-				a = append(a, ah)
+				a = append(a, strings.ToLower(ah))
 			}
 		}
 		if len(a) == 0 {
 			continue
 		}
 		for _, vh_ := range vhosts {
-			vh := getString(vh_)
+			vh := strings.TrimSpace(getString(vh_))
 			if vh != "" {
-				c.hosts[vh] = a
+				c.hosts[strings.ToLower(vh)] = a
 			}
 		}
 	}
-	fmt.Printf("%#v\n", c.hosts)
 	return c, nil
 }
 
