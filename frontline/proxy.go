@@ -114,6 +114,7 @@ func (p *Proxy) acceptLoop() {
 	}
 }
 
+// prepConn() takes a net.Conn and attaches a file descriptor release in its Close method
 func (p *Proxy) prepConn(c net.Conn) (net.Conn, os.Error) {
 	c.(*net.TCPConn).SetKeepAlive(true)
 	err := c.SetReadTimeout(p.config.Timeout)
@@ -135,13 +136,13 @@ func (p *Proxy) connLoop(s_ net.Conn) {
 	// Read and parse first request
 	req0, err := st.Read()
 	if err != nil {
-		st.Close()
+		st.DeepClose()
 		return
 	}
 	req0.Host = strings.ToLower(strings.TrimSpace(req0.Host))
 	if req0.Host == "" {
 		st.Write(req0, http.NewResponse400String("GoFrontline: missing host"))
-		st.Close()
+		st.DeepClose()
 		return
 	}
 
@@ -149,20 +150,24 @@ func (p *Proxy) connLoop(s_ net.Conn) {
 	host := p.config.ActualHost(req0.Host)
 	if host == "" {
 		st.Write(req0, http.NewResponse400String("GoFrontline: unknwon host"))
-		st.Close()
+		st.DeepClose()
 		return
 	}
+	p.fdl.Lock()
 	c_, err := net.Dial("tcp", host)
 	if err != nil {
+		if c_ != nil {
+			c_.Close()
+		}
+		p.fdl.Unlock()
 		st.Write(req0, http.NewResponse400String("GoFrontline: error dialing host"))
 		st.Close()
 		return
 	}
 	c_, err = p.prepConn(c_)
 	if err != nil {
-		c_.Close()
 		st.Write(req0, http.NewResponse400String("GoFrontline: error on host conn"))
-		st.Close()
+		st.DeepClose()
 		return
 	}
 	ct := server.NewStampedClientConn(c_, nil)
@@ -228,6 +233,7 @@ __Close:
 func (p *Proxy) register(st *server.StampedServerConn, ct *server.StampedClientConn) *connPair {
 	p.Lock()
 	defer p.Unlock()
+
 	q := &connPair{st,ct}
 	p.pairs[q] = 1
 	return q
@@ -236,15 +242,9 @@ func (p *Proxy) register(st *server.StampedServerConn, ct *server.StampedClientC
 func (p *Proxy) bury(q *connPair) {
 	p.Lock()
 	defer p.Unlock()
-	p.pairs[q] = 0, false
 
-	s_, _ := q.s.Close()
-	if s_ != nil {
-		s_.Close()
-	}
-	c_, _ := q.c.Close()
-	if c_ != nil {
-		c_.Close()
-	}
+	p.pairs[q] = 0, false
+	q.s.DeepClose()
+	q.c.DeepClose()
 }
 
