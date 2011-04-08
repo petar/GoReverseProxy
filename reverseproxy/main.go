@@ -10,11 +10,11 @@ import (
 
 var (
 	flagBind   = flag.String("bind", "0.0.0.0:80", "Address to bind to")
-	flagConfig = flag.String("conf", "reverseproxy.conf", "Config file")
+	flagConfig = flag.String("config", "reverseproxy.conf", "Config file")
 )
 
 func main() {
-	fmt.Fprintf(os.Stderr, "GoFrontline — 2011 — by Petar Maymounkov, petar@csail.mit.edu\n")
+	fmt.Fprintf(os.Stderr, "GoReverseProxy — 2011 — by Petar Maymounkov, petar@csail.mit.edu\n")
 	flag.Parse()
 	p, err := NewProxyEasy(*flagBind, *flagConfig)
 	if err != nil {
