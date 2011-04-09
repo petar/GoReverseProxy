@@ -203,7 +203,9 @@ func (p *Proxy) frontLoop(ch chan<- *http.Request, q *connPair, req0 *http.Reque
 			var err os.Error
 			req, err = q.s.Read()
 			if err != nil {
-				log.Printf("Read Request: %s\n", err)
+				// NOTE(petar): 'tcp read ... resource temporarily unavailable' errors 
+				// received here, I think, correspond to when the remote side has closed
+				// the connection. This is OK.
 				goto __Close
 			}
 			// TODO: Verify same Host
@@ -229,8 +231,8 @@ __Close:
 // Read request from frontLoop, read response from server, send response to browser, repeat
 func (p *Proxy) backLoop(ch <-chan *http.Request, q *connPair) {
 	for {
-		req, closed := <-ch
-		if closed && req == nil {
+		req, _ := <-ch
+		if req == nil {
 			goto __Close
 		}
 
