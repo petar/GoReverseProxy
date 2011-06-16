@@ -156,7 +156,7 @@ func (p *Proxy) connLoop(s_ net.Conn) {
 	}
 	req0.Host = strings.ToLower(strings.TrimSpace(req0.Host))
 	if req0.Host == "" {
-		st.Write(req0, http.NewResponse400String("GoReverseProxy: missing host"))
+		st.Write(req0, http.NewResponse400String(req0, "GoReverseProxy: missing host"))
 		st.Close()
 		return
 	}
@@ -164,7 +164,7 @@ func (p *Proxy) connLoop(s_ net.Conn) {
 	// Connect to host
 	host := p.config.ActualHost(req0.Host)
 	if host == "" {
-		st.Write(req0, http.NewResponse400String("GoReverseProxy: unknwon host"))
+		st.Write(req0, http.NewResponse400String(req0, "GoReverseProxy: unknwon host"))
 		st.Close()
 		return
 	}
@@ -176,13 +176,13 @@ func (p *Proxy) connLoop(s_ net.Conn) {
 			c_.Close()
 		}
 		p.fdl.Unlock()
-		st.Write(req0, http.NewResponse400String("GoReverseProxy: error dialing host"))
+		st.Write(req0, http.NewResponse400String(req0, "GoReverseProxy: error dialing host"))
 		st.Close()
 		return
 	}
 	c_, err = p.prepConn(c_)
 	if err != nil {
-		st.Write(req0, http.NewResponse400String("GoReverseProxy: error on host conn"))
+		st.Write(req0, http.NewResponse400String(req0, "GoReverseProxy: error on host conn"))
 		st.Close()
 		return
 	}
